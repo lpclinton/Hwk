@@ -1,0 +1,143 @@
+---
+title: "lclinton_hmk5"
+author: "Laurence Clinton"
+date: "February 8, 2019"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## 1.a First, import the .txt file into R so you can process it.
+
+
+
+```{r ReadBabyFile}
+#set working directory
+setwd("D:/SMU/DoingDataScience/Unit5")
+
+#read in 'yob2016' file
+BabyFile <- read.delim("yob2016.txt", header = FALSE,sep=";")
+head(BabyFile)
+
+# create data frame from read file
+df <- data.frame(BabyFile)
+names(df) <- c("First Names","Gender","Name Count")
+
+# display the first few rows
+head(df)
+```
+
+## 1.b Display the summary and structure of df
+
+Output from: summary(df) and str(df)
+
+```{r SummaryStructure}
+#summary of data frame
+summary(df)
+#structure of data frame
+ str(df)
+
+```
+## 1.c Write an R command to figure out which name it is and display it.
+
+```{r FindOddName}
+# grep names that end in 'yyy'
+grep("yyy$",df$`First Names`)
+# confirm finding
+df[212,]
+
+```
+## 1.d Upon finding the misspelled name, please remove this particular observation, as the client says it's redundant. Save the remaining dataset as an object: y2016
+```{r RemoveName}
+# Remove observation and set to object y2016
+y2016 <- df[-c(212),]
+
+#Compare before and after
+nrow(df)
+
+nrow(y2016)
+
+
+```
+
+## 2.a Like 1a, please import the .txt file into R. Look at the file before you do. You might have to change some options to import it properly. Again, please give the dataframe human-readable column names. Assign the dataframe to y2015.
+
+```{r ReadIn2015}
+#read in file
+BabyFile2015 <- read.delim("yob2015.txt", header = FALSE,sep=",")
+#display first few rows
+head(BabyFile2015)
+
+# create data frame from file
+y2015 <- data.frame(BabyFile2015)
+names(y2015) <- c("First Names","Gender","Name Count")
+
+```
+## 2.b Display the last ten rows in the dataframe. Describe something you find interesting
+about these 10 rows
+
+```{r lastRows2015}
+# show last 10 rows
+tail(y2015,10)
+
+#There are some unsual but similar names that start with 'Zy'.
+
+```
+## 2.c Merge y2016 and y2015 by your Name column; assign it to final. The client only cares about names that have data for both 2016 and 2015; there should be no NA values in either of your amount of children rows after merging.
+
+```{r merge}
+#merge data from y2015 and y2016
+final2 <- merge(y2015,y2016,by="First Names")
+#show top rows
+head(final2)
+
+```
+## 3.a  Create a new column called "Total" in final that adds the amount of children in 2015 and 2016 together. In those two years combined, how many people were given popular names.
+
+
+```{r Total}
+final2$Totals <- final2$`Name Count.x` + final2$`Name Count.y`
+
+#How many were given popular names?
+
+#The top ten names seem popular and total 343,758.
+
+```
+## 3.b  Sort data by Total.  What were the top 10 most popular names?
+```{r Final}
+final2_order <- final2[order(final2$Totals,decreasing = TRUE),]
+
+
+#Display top 10 rows
+head(final2_order,10)
+
+```
+
+## 3.c Omit boys.  Top 10 most popular girl's names
+
+```{r Omit boys}
+head(final2_order[final2_order$Gender.x == "F",],10)
+
+```
+
+## 3.d  Write top 10 girl names and totals to csv.
+```{r write to csv}
+#set final data frame
+final_f <- head(final2_order[final2_order$Gender.x == "F",],10)
+final_df <- data.frame(final_f$`First Names`,final_f$Totals)
+
+#Update column names
+names(final_df) <- c("First Names","Totals")
+
+#Display rows
+head(final_df,10)
+
+#write to csv
+write.csv(final_df, file="Female_Names2.csv",row.names = FALSE)
+```
+
